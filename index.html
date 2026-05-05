@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BURN Burger — Fogo no Sabor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --clr-fire: #FF4500;
+  --clr-fire-deep: #C83200;
+  --clr-ember: #FF8C00;
+  --clr-gold: #FFD700;
+  --clr-char: #1A1A1A;
+  --clr-coal: #0D0D0D;
+  --clr-smoke: #2A2A2A;
+  --clr-ash: #3D3D3D;
+  --clr-cream: #FFF8F0;
+  --clr-light: #FFEEDD;
+  --clr-text: #1A1A1A;
+  --clr-text-light: #6B6B6B;
+  --clr-bg: #FFFAF5;
+  --clr-surface: #FFFFFF;
+  --clr-border: rgba(0,0,0,0.08);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.07);
+  --shadow-md: 0 6px 30px rgba(0,0,0,0.12);
+  --shadow-lg: 0 16px 60px rgba(0,0,0,0.18);
+  --shadow-fire: 0 8px 40px rgba(255,69,0,0.3);
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --clr-text: #F5F0EA;
+  --clr-text-light: #AAA09A;
+  --clr-bg: #0D0D0D;
+  --clr-surface: #1A1A1A;
+  --clr-border: rgba(255,255,255,0.08);
+  --clr-cream: #1E1A16;
+  --clr-light: #231F1A;
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  transition: background var(--transition), color var(--transition);
+  overflow-x: hidden;
+  cursor: none;
+}
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+img { max-width: 100%; }
+button { cursor: none; border: none; background: none; font-family: var(--font-body); }
+
+/* ===== CUSTOM CURSOR ===== */
+.cursor {
+  position: fixed; top: 0; left: 0;
+  width: 12px; height: 12px;
+  background: var(--clr-fire);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: multiply;
+}
+.cursor-ring {
+  position: fixed; top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 2px solid var(--clr-fire);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s, width 0.2s, height 0.2s, opacity 0.2s;
+  opacity: 0.6;
+}
+.cursor.hover { width: 20px; height: 20px; background: var(--clr-ember); }
+.cursor-ring.hover { width: 52px; height: 52px; opacity: 0.3; }
+
+/* ===== SCROLL PROGRESS ===== */
+#scroll-progress {
+  position: fixed; top: 0; left: 0;
+  height: 3px; background: linear-gradient(90deg, var(--clr-fire), var(--clr-gold));
+  z-index: 9999; width: 0%; transition: width 0.05s;
+  box-shadow: 0 0 8px var(--clr-fire);
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ===== WAVE LOADER ===== */
+.page-loader {
+  position: fixed; inset: 0; background: var(--clr-coal);
+  z-index: 99997; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 1.5rem;
+  transition: opacity 0.5s, visibility 0.5s;
+}
+.page-loader.hidden { opacity: 0; visibility: hidden; }
+.loader-logo { font-family: var(--font-display); font-size: 5rem; color: var(--clr-fire); letter-spacing: 4px; animation: pulseGlow 1s ease-in-out infinite alternate; }
+.loader-waves { display: flex; gap: 6px; align-items: flex-end; }
+.loader-waves span {
+  display: block; width: 5px; background: var(--clr-ember);
+  border-radius: 3px; animation: wave 0.8s ease-in-out infinite alternate;
+}
+.loader-waves span:nth-child(1) { height: 16px; animation-delay: 0s; }
+.loader-waves span:nth-child(2) { height: 28px; animation-delay: 0.1s; }
+.loader-waves span:nth-child(3) { height: 40px; animation-delay: 0.2s; }
+.loader-waves span:nth-child(4) { height: 28px; animation-delay: 0.3s; }
+.loader-waves span:nth-child(5) { height: 16px; animation-delay: 0.4s; }
+@keyframes wave { to { transform: scaleY(0.4); opacity: 0.5; } }
+@keyframes pulseGlow { to { text-shadow: 0 0 40px var(--clr-fire), 0 0 80px rgba(255,69,0,0.5); } }
+
+/* ===== HEADER ===== */
+header {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 0 2rem;
+  height: 70px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+header.scrolled {
+  background: var(--clr-surface);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+  backdrop-filter: blur(20px);
+}
+.logo {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--clr-fire);
+  letter-spacing: 3px;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.logo-flame { animation: flicker 2s ease-in-out infinite; display: inline-block; }
+@keyframes flicker {
+  0%,100% { transform: rotate(-5deg) scale(1); }
+  25% { transform: rotate(5deg) scale(1.1); }
+  50% { transform: rotate(-3deg) scale(0.95); }
+  75% { transform: rotate(4deg) scale(1.05); }
+}
+nav { display: flex; gap: 2rem; }
+nav a {
+  font-size: 0.9rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--clr-text); position: relative;
+  transition: color var(--transition);
+}
+nav a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 2px; background: var(--clr-fire);
+  transition: width var(--transition);
+}
+nav a:hover { color: var(--clr-fire); }
+nav a:hover::after { width: 100%; }
+.header-actions { display: flex; gap: 1rem; align-items: center; }
+
+.btn-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--clr-text); font-size: 1.1rem; position: relative;
+  transition: all var(--transition); border: 1.5px solid var(--clr-border);
+  background: var(--clr-surface);
+}
+.btn-icon:hover { background: var(--clr-fire); color: white; border-color: var(--clr-fire); transform: scale(1.1); }
+
+.cart-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--clr-fire); color: white;
+  font-size: 0.65rem; font-weight: 700;
+  min-width: 18px; height: 18px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  transform: scale(0); transition: transform 0.2s;
+}
+.cart-badge.show { transform: scale(1); }
+.cart-badge.shake { animation: shake 0.5s; }
+@keyframes shake {
+  0%,100% { transform: scale(1) rotate(0deg); }
+  20% { transform: scale(1.1) rotate(-5deg); }
+  40% { transform: scale(1.1) rotate(5deg); }
+  60% { transform: scale(1.1) rotate(-3deg); }
+  80% { transform: scale(1.1) rotate(3deg); }
+}
+
+/* Theme toggle */
+.theme-toggle {
+  width: 52px; height: 28px; border-radius: 14px;
+  background: var(--clr-ash); position: relative;
+  transition: background var(--transition); cursor: none;
+  border: 1px solid var(--clr-border);
+}
+.theme-toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; transition: transform var(--transition);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .theme-toggle { background: var(--clr-fire); }
+[data-theme="dark"] .theme-toggle::after { transform: translateX(24px); }
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh; position: relative;
+  display: flex; align-items: center;
+  overflow: hidden;
+  background: var(--clr-coal);
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 60% 50%, rgba(255,69,0,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(255,140,0,0.1) 0%, transparent 50%);
+}
+.hero-pattern {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.hero-content {
+  position: relative; z-index: 2;
+  padding: 10rem 8rem 6rem;
+  max-width: 700px;
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,69,0,0.15); border: 1px solid rgba(255,69,0,0.3);
+  color: var(--clr-ember); padding: 6px 14px; border-radius: 20px;
+  font-size: 0.8rem; font-family: var(--font-mono); letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 10vw, 9rem);
+  line-height: 0.9;
+  color: white;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+}
+.hero h1 span { color: var(--clr-fire); display: block; }
+.hero-typewriter {
+  font-size: 1.2rem; color: rgba(255,255,255,0.7);
+  margin-bottom: 2.5rem; line-height: 1.6;
+  font-weight: 300; min-height: 2em;
+}
+.cursor-blink { animation: blink 1s step-end infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+.hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--clr-fire); color: white;
+  padding: 1rem 2rem; border-radius: var(--radius-lg);
+  font-weight: 600; font-size: 1rem; letter-spacing: 0.5px;
+  transition: all var(--transition); position: relative; overflow: hidden;
+  box-shadow: var(--shadow-fire);
+}
+.btn-primary:hover { background: var(--clr-fire-deep); transform: translateY(-2px); box-shadow: 0 12px 50px rgba(255,69,0,0.45); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 10px;
+  border: 2px solid rgba(255,255,255,0.3); color: white;
+  padding: 1rem 2rem; border-radius: var(--radius-lg);
+  font-weight: 500; font-size: 1rem;
+  transition: all var(--transition); backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.05);
+}
+.btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+.hero-image {
+  position: absolute; right: 6%; bottom: 0;
+  width: 45%; max-width: 580px;
+  z-index: 1;
+  animation: heroFloat 4s ease-in-out infinite;
+}
+.hero-image img { width: 100%; filter: drop-shadow(0 20px 60px rgba(255,69,0,0.4)); }
+@keyframes heroFloat {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-18px); }
+}
+.hero-stats {
+  position: absolute; bottom: 4rem; left: 8rem;
+  display: flex; gap: 3rem; z-index: 2;
+}
+.hero-stat { color: white; }
+.hero-stat strong { display: block; font-family: var(--font-display); font-size: 2.5rem; color: var(--clr-ember); }
+.hero-stat span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
+
+/* ===== RIPPLE ===== */
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  animation: ripple-anim 0.6s linear;
+  pointer-events: none;
+  transform: scale(0);
+}
+@keyframes ripple-anim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ===== SECTION BASE ===== */
+section { padding: 6rem 4rem; }
+.section-tag {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--clr-fire); display: inline-block; margin-bottom: 0.8rem;
+}
+.section-title {
+  font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 1; letter-spacing: 1px; color: var(--clr-text);
+  margin-bottom: 1rem;
+}
+.section-sub {
+  color: var(--clr-text-light); font-size: 1.05rem;
+  max-width: 500px; line-height: 1.7;
+}
+
+/* ===== FADE-UP ANIMATION ===== */
+.fade-up {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+.fade-up:nth-child(2) { transition-delay: 0.1s; }
+.fade-up:nth-child(3) { transition-delay: 0.2s; }
+.fade-up:nth-child(4) { transition-delay: 0.3s; }
+.fade-up:nth-child(5) { transition-delay: 0.4s; }
+.fade-up:nth-child(6) { transition-delay: 0.5s; }
+
+/* ===== MENU SECTION ===== */
+.menu-section { background: var(--clr-bg); }
+.menu-header { text-align: center; margin-bottom: 3rem; }
+.menu-controls {
+  display: flex; gap: 1rem; align-items: center;
+  flex-wrap: wrap; justify-content: center; margin-bottom: 3rem;
+}
+.search-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--clr-surface); border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-lg); padding: 0.6rem 1.2rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  min-width: 260px;
+}
+.search-box:focus-within { border-color: var(--clr-fire); box-shadow: 0 0 0 3px rgba(255,69,0,0.1); }
+.search-box input { background: none; border: none; outline: none; font-family: var(--font-body); font-size: 0.95rem; color: var(--clr-text); width: 100%; }
+.search-box i { color: var(--clr-text-light); }
+
+.filter-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.filter-btn {
+  padding: 0.5rem 1.2rem; border-radius: 20px; font-size: 0.85rem;
+  font-weight: 500; border: 1.5px solid var(--clr-border);
+  background: var(--clr-surface); color: var(--clr-text);
+  transition: all var(--transition); cursor: none;
+  font-family: var(--font-body);
+}
+.filter-btn:hover, .filter-btn.active { background: var(--clr-fire); color: white; border-color: var(--clr-fire); }
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.menu-card {
+  background: var(--clr-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--clr-border);
+  transition: transform var(--transition), box-shadow var(--transition);
+  position: relative;
+}
+.menu-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.menu-card.hidden { display: none; }
+
+.card-img {
+  height: 200px; overflow: hidden; position: relative;
+  background: linear-gradient(135deg, #FFF0E0, #FFE0C0);
+}
+.card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.menu-card:hover .card-img img { transform: scale(1.08); }
+
+.card-badge {
+  position: absolute; top: 12px; left: 12px;
+  background: var(--clr-fire); color: white;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 20px; text-transform: uppercase;
+}
+.card-badge.new { background: #00C896; }
+.card-badge.spicy { background: #FF4500; }
+
+.card-like {
+  position: absolute; top: 12px; right: 12px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: white; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm); transition: all 0.2s; cursor: none;
+  font-size: 0.9rem; color: #CCC;
+}
+.card-like.liked { color: #FF4500; animation: heartBeat 0.4s ease; }
+.card-like:hover { transform: scale(1.2); }
+@keyframes heartBeat {
+  0%,100% { transform: scale(1); }
+  25% { transform: scale(1.3); }
+  50% { transform: scale(0.9); }
+  75% { transform: scale(1.2); }
+}
+
+.card-body { padding: 1.2rem; }
+.card-category { font-size: 0.72rem; color: var(--clr-fire); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; }
+.card-name { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--clr-text); }
+.card-desc { font-size: 0.85rem; color: var(--clr-text-light); line-height: 1.5; margin-bottom: 1rem; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; }
+.card-price { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: var(--clr-fire); }
+
+.counter {
+  display: flex; align-items: center; gap: 0.5rem;
+  border: 1.5px solid var(--clr-border); border-radius: 20px; padding: 4px;
+}
+.counter-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 700; color: var(--clr-text);
+  transition: all 0.2s; background: transparent; cursor: none;
+  font-family: var(--font-body);
+}
+.counter-btn:hover { background: var(--clr-fire); color: white; }
+.counter-num { font-family: var(--font-mono); font-size: 0.9rem; min-width: 20px; text-align: center; font-weight: 700; }
+
+.add-btn {
+  display: none; width: 100%; margin-top: 0.8rem;
+  background: var(--clr-fire); color: white;
+  padding: 0.75rem; border-radius: var(--radius-md);
+  font-weight: 600; font-size: 0.9rem;
+  transition: all var(--transition); position: relative; overflow: hidden;
+  cursor: none; font-family: var(--font-body);
+}
+.add-btn:hover { background: var(--clr-fire-deep); }
+.counter:not(:has(.counter-num[data-val="0"])) ~ .add-btn { display: block; }
+
+/* ===== DIFFERENTIALS ===== */
+.differentials {
+  background: var(--clr-char);
+  position: relative; overflow: hidden;
+}
+.diff-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,69,0,0.08) 0%, transparent 70%);
+}
+.diff-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem; position: relative;
+}
+.diff-card {
+  padding: 2rem 1.5rem; border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  text-align: center;
+  transition: all var(--transition); position: relative; overflow: hidden;
+}
+.diff-card::before {
+  content: ''; position: absolute; top: 0; left: 50%; width: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--clr-fire), transparent);
+  transform: translateX(-50%); transition: width 0.4s;
+}
+.diff-card:hover::before { width: 100%; }
+.diff-card:hover { background: rgba(255,69,0,0.08); transform: translateY(-4px); }
+
+.diff-icon {
+  width: 64px; height: 64px; border-radius: var(--radius-md);
+  background: rgba(255,69,0,0.15); color: var(--clr-fire);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin: 0 auto 1.2rem;
+  transition: all var(--transition);
+  position: relative;
+}
+.diff-card:hover .diff-icon { background: var(--clr-fire); color: white; transform: rotate(-5deg) scale(1.1); }
+.diff-icon i { transition: transform 0.3s; }
+.diff-card:hover .diff-icon i { transform: scale(1.1); }
+
+.diff-card h3 { font-size: 1rem; font-weight: 600; color: white; margin-bottom: 0.5rem; }
+.diff-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+/* ===== TESTIMONIALS ===== */
+.testimonials { background: var(--clr-bg); }
+.testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+.testimonial-card {
+  padding: 1.8rem;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+[data-theme="dark"] .testimonial-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.testi-quote { font-size: 2rem; color: var(--clr-fire); line-height: 1; margin-bottom: 0.8rem; }
+.testi-text { font-size: 0.95rem; color: var(--clr-text); line-height: 1.7; margin-bottom: 1.2rem; font-style: italic; }
+.testi-author { display: flex; align-items: center; gap: 0.8rem; }
+.testi-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  object-fit: cover; border: 2px solid var(--clr-fire);
+}
+.testi-name { font-weight: 600; font-size: 0.9rem; }
+.testi-stars { color: var(--clr-gold); font-size: 0.75rem; }
+
+/* ===== CONTACT ===== */
+.contact { background: var(--clr-cream); }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+.contact-form { background: var(--clr-surface); padding: 2.5rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); }
+.form-group { margin-bottom: 1.3rem; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--clr-text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+.form-input {
+  width: 100%; padding: 0.9rem 1.2rem;
+  background: var(--clr-bg); border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-md); font-family: var(--font-body); font-size: 0.95rem;
+  color: var(--clr-text); transition: all var(--transition); outline: none;
+}
+.form-input:focus { border-color: var(--clr-fire); box-shadow: 0 0 0 3px rgba(255,69,0,0.1); }
+.form-input.error { border-color: #EF4444; }
+.form-input.success { border-color: #10B981; }
+.form-error { color: #EF4444; font-size: 0.78rem; margin-top: 0.3rem; display: none; }
+.form-error.show { display: block; }
+textarea.form-input { min-height: 120px; resize: vertical; }
+
+.contact-info h3 { font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1.5rem; color: var(--clr-text); }
+.contact-item { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem; }
+.contact-icon { width: 44px; height: 44px; background: rgba(255,69,0,0.1); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--clr-fire); font-size: 1rem; flex-shrink: 0; }
+.contact-item strong { display: block; font-size: 0.85rem; margin-bottom: 0.2rem; }
+.contact-item span { font-size: 0.9rem; color: var(--clr-text-light); line-height: 1.5; }
+
+.hours-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1.5rem; }
+.hours-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.3rem 0; border-bottom: 1px dashed var(--clr-border); }
+.hours-day { color: var(--clr-text-light); }
+.hours-time { font-weight: 600; color: var(--clr-text); }
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--clr-coal); color: white;
+  padding: 4rem 4rem 2rem;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+.footer-brand .logo { font-size: 2.2rem; margin-bottom: 1rem; }
+.footer-brand p { color: rgba(255,255,255,0.5); font-size: 0.9rem; line-height: 1.7; max-width: 260px; }
+.footer-col h4 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin-bottom: 1.2rem; }
+.footer-col a { display: block; color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 0.6rem; transition: color var(--transition); }
+.footer-col a:hover { color: var(--clr-fire); }
+.social-links { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+.social-link {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.6); font-size: 0.9rem;
+  transition: all var(--transition);
+}
+.social-link:hover { background: var(--clr-fire); border-color: var(--clr-fire); color: white; transform: translateY(-3px); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+.footer-bottom p { color: rgba(255,255,255,0.35); font-size: 0.8rem; }
+
+/* ===== CART SIDEBAR ===== */
+.cart-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 2000; opacity: 0; pointer-events: none;
+  transition: opacity var(--transition); backdrop-filter: blur(4px);
+}
+.cart-overlay.open { opacity: 1; pointer-events: all; }
+.cart-sidebar {
+  position: fixed; right: -420px; top: 0; bottom: 0;
+  width: 420px; background: var(--clr-surface);
+  z-index: 2001; display: flex; flex-direction: column;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -10px 0 60px rgba(0,0,0,0.3);
+}
+.cart-sidebar.open { right: 0; }
+.cart-header {
+  padding: 1.5rem; border-bottom: 1px solid var(--clr-border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cart-title { font-family: var(--font-display); font-size: 1.8rem; color: var(--clr-text); }
+.cart-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+.cart-empty { text-align: center; padding: 3rem 1rem; color: var(--clr-text-light); }
+.cart-empty i { font-size: 3rem; margin-bottom: 1rem; color: var(--clr-border); display: block; }
+.cart-item {
+  display: flex; gap: 1rem; align-items: center;
+  padding: 1rem; border-radius: var(--radius-md);
+  border: 1px solid var(--clr-border); margin-bottom: 0.8rem;
+  transition: all var(--transition);
+}
+.cart-item:hover { border-color: var(--clr-fire); }
+.cart-item-img { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; }
+.cart-item-info { flex: 1; }
+.cart-item-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem; }
+.cart-item-price { color: var(--clr-fire); font-family: var(--font-mono); font-size: 0.85rem; }
+.cart-item-remove { color: var(--clr-text-light); font-size: 0.8rem; transition: color var(--transition); cursor: none; background: none; border: none; font-family: var(--font-body); }
+.cart-item-remove:hover { color: #EF4444; }
+.cart-footer { padding: 1.5rem; border-top: 1px solid var(--clr-border); }
+.cart-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+.cart-total span { font-size: 0.9rem; color: var(--clr-text-light); }
+.cart-total strong { font-family: var(--font-mono); font-size: 1.6rem; color: var(--clr-fire); }
+.btn-checkout {
+  width: 100%; padding: 1rem; background: var(--clr-fire); color: white;
+  border-radius: var(--radius-md); font-weight: 700; font-size: 1rem;
+  transition: all var(--transition); cursor: none; font-family: var(--font-body);
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.btn-checkout:hover { background: var(--clr-fire-deep); transform: translateY(-2px); }
+
+/* ===== TOAST ===== */
+.toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.8rem; }
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--clr-surface); color: var(--clr-text);
+  padding: 0.9rem 1.4rem; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); border-left: 4px solid var(--clr-fire);
+  min-width: 280px; font-size: 0.9rem;
+  animation: slideIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+  position: relative; overflow: hidden;
+}
+.toast.exit { animation: slideOut 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100px); } }
+.toast-icon { color: var(--clr-fire); font-size: 1.1rem; flex-shrink: 0; }
+.toast-progress {
+  position: absolute; bottom: 0; left: 0; height: 2px;
+  background: var(--clr-fire); animation: toastProgress 3s linear forwards;
+}
+@keyframes toastProgress { from { width: 100%; } to { width: 0%; } }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 3000; opacity: 0; pointer-events: none;
+  transition: opacity var(--transition); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--clr-surface); border-radius: var(--radius-xl);
+  padding: 2.5rem; max-width: 480px; width: 90%;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+.modal-header { text-align: center; margin-bottom: 2rem; }
+.modal-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+.modal h2 { font-family: var(--font-display); font-size: 2rem; color: var(--clr-text); }
+.modal-items { border: 1px solid var(--clr-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1.5rem; }
+.modal-item { display: flex; justify-content: space-between; padding: 0.8rem 1.2rem; font-size: 0.9rem; border-bottom: 1px solid var(--clr-border); }
+.modal-item:last-child { border-bottom: none; }
+.modal-total { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; padding: 1rem 0; border-top: 2px solid var(--clr-border); margin-bottom: 1.5rem; }
+.modal-total span:last-child { color: var(--clr-fire); font-family: var(--font-mono); }
+
+.btn-success {
+  width: 100%; padding: 1rem; background: #10B981; color: white;
+  border-radius: var(--radius-md); font-weight: 700; font-size: 1rem;
+  transition: all var(--transition); cursor: none; font-family: var(--font-body);
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.btn-success:hover { background: #059669; }
+.spinner {
+  display: none; width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.checkmark { display: none; font-size: 1.2rem; }
+.loading-state .btn-text { display: none; }
+.loading-state .spinner { display: block; }
+.success-state .btn-text { display: none; }
+.success-state .spinner { display: none; }
+.success-state .checkmark { display: block; }
+
+/* ===== TOOLTIP ===== */
+[data-tooltip] { position: relative; }
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--clr-char); color: white;
+  padding: 5px 10px; border-radius: 6px;
+  font-size: 0.75rem; white-space: nowrap;
+  pointer-events: none; opacity: 0; transition: all 0.2s;
+}
+[data-tooltip]:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1100px) {
+  .hero-content { padding: 10rem 4rem 6rem; }
+  .hero-image { width: 48%; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .contact-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  nav { display: none; }
+  section { padding: 4rem 1.5rem; }
+  .hero-content { padding: 8rem 1.5rem 4rem; max-width: 100%; }
+  .hero-image { display: none; }
+  .hero-stats { left: 1.5rem; gap: 2rem; bottom: 2rem; }
+  .menu-controls { flex-direction: column; }
+  .search-box { min-width: 100%; }
+  footer { padding: 3rem 1.5rem 1.5rem; }
+  .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .cart-sidebar { width: 100%; right: -100%; }
+  .hero-ctas { flex-direction: column; }
+  .body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+
+<!-- Scroll Progress -->
+<div id="scroll-progress" role="progressbar" aria-label="Progresso de leitura"></div>
+
+<!-- Page Loader -->
+<div class="page-loader" id="page-loader" aria-hidden="true">
+  <div class="loader-logo">BURN</div>
+  <div class="loader-waves">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-label="Notificações"></div>
+
+<!-- Cart Overlay & Sidebar -->
+<div class="cart-overlay" id="cart-overlay" role="dialog" aria-modal="true" aria-label="Carrinho de compras"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <span class="cart-title">🔥 Carrinho</span>
+    <button class="btn-icon" id="close-cart" aria-label="Fechar carrinho"><i class="fa fa-times"></i></button>
+  </div>
+  <div class="cart-body" id="cart-body">
+    <div class="cart-empty" id="cart-empty">
+      <i class="fa fa-shopping-bag"></i>
+      <p>Seu carrinho está vazio.<br>Adicione itens do cardápio!</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total do pedido</span>
+      <strong id="cart-total">R$ 0,00</strong>
+    </div>
+    <button class="btn-checkout" id="btn-checkout" aria-label="Finalizar pedido">
+      <i class="fa fa-bolt"></i> Finalizar Pedido
+    </button>
+  </div>
+</aside>
+
+<!-- Order Modal -->
+<div class="modal-overlay" id="order-modal" role="dialog" aria-modal="true" aria-label="Resumo do pedido">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon">🍔</div>
+      <h2>Resumo do Pedido</h2>
+    </div>
+    <div class="modal-items" id="modal-items"></div>
+    <div class="modal-total">
+      <span>Total</span>
+      <span id="modal-total">R$ 0,00</span>
+    </div>
+    <button class="btn-success" id="btn-confirm-order" aria-label="Confirmar e pagar">
+      <div class="spinner"></div>
+      <span class="btn-text"><i class="fa fa-check"></i> Confirmar Pedido</span>
+      <span class="checkmark">✅ Pedido Enviado!</span>
+    </button>
+    <button class="btn-outline" style="width:100%;margin-top:.8rem;border-color:var(--clr-border);color:var(--clr-text);padding:.8rem;border-radius:var(--radius-md);" id="btn-close-modal">Voltar ao carrinho</button>
+  </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header id="header">
+  <a href="#" class="logo" aria-label="BURN Burger - Início">
+    <span class="logo-flame" aria-hidden="true">🔥</span>
+    BURN
+  </a>
+  <nav role="navigation" aria-label="Menu principal">
+    <a href="#menu">Cardápio</a>
+    <a href="#differentials">Diferenciais</a>
+    <a href="#testimonials">Avaliações</a>
+    <a href="#contact">Contato</a>
+  </nav>
+  <div class="header-actions">
+    <button class="theme-toggle" id="theme-toggle" aria-label="Alternar tema claro/escuro" title="Tema"></button>
+    <button class="btn-icon" id="cart-btn" aria-label="Abrir carrinho" data-tooltip="Carrinho">
+      <i class="fa fa-shopping-cart"></i>
+      <span class="cart-badge" id="cart-badge" aria-label="Itens no carrinho">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="home" aria-label="Seção principal">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-pattern" aria-hidden="true"></div>
+  <div class="hero-content">
+    <div class="hero-tag" aria-label="Aberto agora">
+      <span style="width:8px;height:8px;background:#10B981;border-radius:50%;display:inline-block;animation:pulseGreen 1.5s infinite;"></span>
+      Aberto agora · Delivery 30min
+    </div>
+    <h1>
+      SABOR<br>
+      <span>COM</span>
+      FOGO
+    </h1>
+    <p class="hero-typewriter" id="typewriter" aria-live="polite"></p>
+    <div class="hero-ctas">
+      <a href="#menu" class="btn-primary" aria-label="Ver cardápio completo">
+        <i class="fa fa-fire" aria-hidden="true"></i> Ver Cardápio
+      </a>
+      <a href="#contact" class="btn-outline" aria-label="Fazer pedido pelo WhatsApp">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i> Pedir Agora
+      </a>
+    </div>
+  </div>
+  <div class="hero-image" aria-hidden="true">
+    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80&auto=format&fit=crop" alt="Hambúrguer artesanal BURN" loading="eager">
+  </div>
+  <div class="hero-stats" aria-label="Estatísticas">
+    <div class="hero-stat">
+      <strong>+12k</strong>
+      <span>Pedidos/mês</span>
+    </div>
+    <div class="hero-stat">
+      <strong>4.9★</strong>
+      <span>Avaliação</span>
+    </div>
+    <div class="hero-stat">
+      <strong>8 anos</strong>
+      <span>No mercado</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MENU ===== -->
+<section class="menu-section" id="menu" aria-label="Cardápio">
+  <div class="menu-header fade-up">
+    <span class="section-tag">// CARDÁPIO</span>
+    <h2 class="section-title">Escolha seu<br>favorito</h2>
+  </div>
+  <div class="menu-controls fade-up">
+    <div class="search-box" role="search">
+      <i class="fa fa-search" aria-hidden="true"></i>
+      <input type="text" id="search-input" placeholder="Buscar no cardápio..." aria-label="Buscar itens do cardápio">
+    </div>
+    <div class="filter-btns" role="group" aria-label="Filtrar por categoria">
+      <button class="filter-btn active" data-filter="all" aria-pressed="true">Todos</button>
+      <button class="filter-btn" data-filter="hamburger" aria-pressed="false">🍔 Burgers</button>
+      <button class="filter-btn" data-filter="sides" aria-pressed="false">🍟 Acompanhamentos</button>
+      <button class="filter-btn" data-filter="drinks" aria-pressed="false">🥤 Bebidas</button>
+      <button class="filter-btn" data-filter="desserts" aria-pressed="false">🍰 Sobremesas</button>
+    </div>
+  </div>
+  <div class="menu-grid" id="menu-grid" role="list" aria-label="Itens do cardápio">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- ===== DIFFERENTIALS ===== -->
+<section class="differentials" id="differentials" aria-label="Nossos diferenciais">
+  <div style="position:relative;z-index:1">
+    <div style="text-align:center;margin-bottom:3rem;" class="fade-up">
+      <span class="section-tag" style="color:var(--clr-ember)">// POR QUÊ BURN?</span>
+      <h2 class="section-title" style="color:white">Feito com paixão,<br>entregue com fogo</h2>
+    </div>
+    <div class="diff-grid">
+      <div class="diff-card fade-up" role="article">
+        <div class="diff-icon" aria-hidden="true"><i class="fa fa-fire"></i></div>
+        <h3>Brasa Real</h3>
+        <p>Todos nossos hambúrgueres grelhados em brasa de carvão vegetal, garantindo sabor único.</p>
+      </div>
+      <div class="diff-card fade-up" role="article">
+        <div class="diff-icon" aria-hidden="true"><i class="fa fa-leaf"></i></div>
+        <h3>Ingredientes Frescos</h3>
+        <p>Fornecedores locais, ingredientes chegando frescos diariamente. Zero congelados.</p>
+      </div>
+      <div class="diff-card fade-up" role="article">
+        <div class="diff-icon" aria-hidden="true"><i class="fa fa-bolt"></i></div>
+        <h3>Delivery Ultra-Rápido</h3>
+        <p>Frota própria de motoboys. Garantia de entrega em até 30 minutos ou desconto na próxima.</p>
+      </div>
+      <div class="diff-card fade-up" role="article">
+        <div class="diff-icon" aria-hidden="true"><i class="fa fa-star"></i></div>
+        <h3>Receitas Autorais</h3>
+        <p>Mais de 20 combinações exclusivas criadas pelo nosso chef há 8 anos e aperfeiçoadas com você.</p>
+      </div>
+      <div class="diff-card fade-up" role="article">
+        <div class="diff-icon" aria-hidden="true"><i class="fa fa-recycle"></i></div>
+        <h3>Embalagem Sustentável</h3>
+        <p>100% das embalagens biodegradáveis. Porque o planeta também merece cuidado.</p>
+      </div>
+      <div class="diff-card fade-up" role="article">
+        <div class="diff-icon" aria-hidden="true"><i class="fa fa-heart"></i></div>
+        <h3>Feito com Amor</h3>
+        <p>Cada hambúrguer montado à mão com atenção e carinho. Sempre.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testimonials" id="testimonials" aria-label="Avaliações de clientes">
+  <div style="text-align:center;margin-bottom:1rem;" class="fade-up">
+    <span class="section-tag">// CLIENTES FALAM</span>
+    <h2 class="section-title">Quem prova,<br>volta sempre</h2>
+  </div>
+  <div class="testimonials-grid">
+    <article class="testimonial-card fade-up">
+      <div class="testi-quote" aria-hidden="true">"</div>
+      <p class="testi-text">O melhor hambúrguer que já comi na minha vida. A carne é suculenta, o pão é perfeito e a brasa dá aquele sabor incrível. Virei fã!</p>
+      <div class="testi-author">
+        <img class="testi-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&q=80&fit=crop&crop=faces" alt="Mariana Souza" loading="lazy">
+        <div>
+          <div class="testi-name">Mariana Souza</div>
+          <div class="testi-stars" aria-label="5 estrelas">★★★★★</div>
+        </div>
+      </div>
+    </article>
+    <article class="testimonial-card fade-up">
+      <div class="testi-quote" aria-hidden="true">"</div>
+      <p class="testi-text">Delivery chegou em 22 minutos e ainda quente! O Double Inferno é literalmente perfeito. Pedido toda semana garantido.</p>
+      <div class="testi-author">
+        <img class="testi-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&q=80&fit=crop&crop=faces" alt="Rafael Lima" loading="lazy">
+        <div>
+          <div class="testi-name">Rafael Lima</div>
+          <div class="testi-stars" aria-label="5 estrelas">★★★★★</div>
+        </div>
+      </div>
+    </article>
+    <article class="testimonial-card fade-up">
+      <div class="testi-quote" aria-hidden="true">"</div>
+      <p class="testi-text">Fui com a família e foi perfeito. As batatas artesanais são sensacionais. A experiência toda é muito boa, voltamos com certeza.</p>
+      <div class="testi-author">
+        <img class="testi-avatar" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&q=80&fit=crop&crop=faces" alt="Ana Carvalho" loading="lazy">
+        <div>
+          <div class="testi-name">Ana Carvalho</div>
+          <div class="testi-stars" aria-label="5 estrelas">★★★★★</div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="contact" id="contact" aria-label="Contato e horários">
+  <div class="contact-grid">
+    <div class="fade-up">
+      <span class="section-tag">// FALE CONOSCO</span>
+      <div class="contact-form">
+        <form id="contact-form" novalidate aria-label="Formulário de contato">
+          <div class="form-group">
+            <label for="name">Nome</label>
+            <input type="text" id="name" class="form-input" placeholder="Seu nome completo" aria-required="true" autocomplete="name">
+            <span class="form-error" id="name-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" class="form-input" placeholder="seu@email.com" aria-required="true" autocomplete="email">
+            <span class="form-error" id="email-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="message">Mensagem</label>
+            <textarea id="message" class="form-input" placeholder="Sugestão, elogio ou reclamação..." aria-required="true"></textarea>
+            <span class="form-error" id="message-error" role="alert"></span>
+          </div>
+          <button type="submit" class="btn-primary" style="width:100%;justify-content:center;" aria-label="Enviar mensagem">
+            <i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar Mensagem
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="contact-info fade-up">
+      <h3>Venha nos visitar</h3>
+      <div class="contact-item">
+        <div class="contact-icon" aria-hidden="true"><i class="fa fa-map-marker-alt"></i></div>
+        <div>
+          <strong>Endereço</strong>
+          <span>Av. das Chamas, 1234 — Vila Brasas<br>São Paulo, SP — 01234-567</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon" aria-hidden="true"><i class="fa fa-phone"></i></div>
+        <div>
+          <strong>Telefone / WhatsApp</strong>
+          <span>(11) 98765-4321</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon" aria-hidden="true"><i class="fa fa-clock"></i></div>
+        <div>
+          <strong>Horário de Funcionamento</strong>
+          <div class="hours-grid" style="margin-top:0.5rem">
+            <div class="hours-row"><span class="hours-day">Seg – Sex</span><span class="hours-time">11h – 23h</span></div>
+            <div class="hours-row"><span class="hours-day">Sábado</span><span class="hours-time">11h – 00h</span></div>
+            <div class="hours-row"><span class="hours-day">Domingo</span><span class="hours-time">12h – 22h</span></div>
+            <div class="hours-row"><span class="hours-day">Feriados</span><span class="hours-time">12h – 21h</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer role="contentinfo">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">🔥 BURN</div>
+      <p>Hambúrgueres artesanais feitos com paixão, ingredientes frescos e muito fogo. Desde 2016.</p>
+      <div class="social-links" aria-label="Redes sociais">
+        <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-link" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="#" class="social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Menu</h4>
+      <a href="#menu">Hambúrgueres</a>
+      <a href="#menu">Acompanhamentos</a>
+      <a href="#menu">Bebidas</a>
+      <a href="#menu">Sobremesas</a>
+    </div>
+    <div class="footer-col">
+      <h4>Empresa</h4>
+      <a href="#">Sobre nós</a>
+      <a href="#">Nossa história</a>
+      <a href="#">Franquias</a>
+      <a href="#">Trabalhe conosco</a>
+    </div>
+    <div class="footer-col">
+      <h4>Atendimento</h4>
+      <a href="#">FAQ</a>
+      <a href="#">Política de entrega</a>
+      <a href="#">Termos de uso</a>
+      <a href="#contact">Contato</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 BURN Burger. Todos os direitos reservados.</p>
+    <p style="color:rgba(255,255,255,0.2)">Feito com 🔥 em São Paulo</p>
+  </div>
+</footer>
+
+<style>
+@keyframes pulseGreen {
+  0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+}
+</style>
+
+<script>
+/* ===== MENU DATA ===== */
+const menuItems = [
+  {
+    id: 1, name: "Double Inferno", category: "hamburger",
+    price: 42.90, badge: "Mais Pedido", badgeType: "spicy",
+    desc: "Dois smash patties 150g, queijo americano duplo, molho inferno picante, cebola caramelizada e alface.",
+    img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  },
+  {
+    id: 2, name: "Smoky Classic", category: "hamburger",
+    price: 36.90, badge: "Novo", badgeType: "new",
+    desc: "Patty defumado 180g, queijo cheddar, bacon crocante, picles artesanal e maionese da casa.",
+    img: "https://images.unsplash.com/photo-1596662951482-0bc6b6f19c8f?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  },
+  {
+    id: 3, name: "Veggie Ember", category: "hamburger",
+    price: 34.90, badge: null,
+    desc: "Burger de grão-de-bico e beterraba, queijo vegano, rúcula, tomate seco e pesto de manjericão.",
+    img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  },
+  {
+    id: 4, name: "Batata Brasa", category: "sides",
+    price: 18.90, badge: null,
+    desc: "Batatas rústicas fritas em gordura de pato, temperadas com alecrim, páprica defumada e flor de sal.",
+    img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  },
+  {
+    id: 5, name: "Shake de Caramelo", category: "drinks",
+    price: 22.90, badge: null,
+    desc: "Milkshake cremoso com sorvete artesanal, calda de caramelo salgado, chantilly e raspas de chocolate.",
+    img: "https://images.unsplash.com/photo-1568901839119-631418a3910d?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  },
+  {
+    id: 6, name: "Brownie Vulcão", category: "desserts",
+    price: 16.90, badge: "Novo", badgeType: "new",
+    desc: "Brownie quentinho de chocolate 70% cacau com sorvete de baunilha e calda quente de chocolate.",
+    img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  },
+  {
+    id: 7, name: "Gold Rush Burger", category: "hamburger",
+    price: 48.90, badge: null,
+    desc: "Patty wagyu 200g, queijo brie derretido, geleia de pimenta, folha de ouro comestível e aioli trufado.",
+    img: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  },
+  {
+    id: 8, name: "Limonada Brasa", category: "drinks",
+    price: 14.90, badge: null,
+    desc: "Limonada suíça com limão siciliano, leite condensado, gelo e toque de cardamomo defumado.",
+    img: "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&q=75&auto=format&fit=crop",
+    liked: false, count: 0
+  }
+];
+
+/* ===== CART STATE ===== */
+let cart = JSON.parse(localStorage.getItem('burn_cart') || '[]');
+let currentFilter = 'all';
+let searchQuery = '';
+
+/* ===== SAVE CART ===== */
+function saveCart() {
+  localStorage.setItem('burn_cart', JSON.stringify(cart));
+}
+
+/* ===== RENDER MENU ===== */
+function renderMenu() {
+  const grid = document.getElementById('menu-grid');
+  grid.innerHTML = '';
+  const filtered = menuItems.filter(item => {
+    const matchFilter = currentFilter === 'all' || item.category === currentFilter;
+    const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchFilter && matchSearch;
+  });
+  if (!filtered.length) {
+    grid.innerHTML = '<p style="text-align:center;color:var(--clr-text-light);grid-column:1/-1;padding:3rem 0;">Nenhum item encontrado 😢</p>';
+    return;
+  }
+  filtered.forEach((item, i) => {
+    const count = cart.find(c => c.id === item.id)?.qty || 0;
+    const card = document.createElement('article');
+    card.className = 'menu-card fade-up';
+    card.setAttribute('role', 'listitem');
+    card.style.transitionDelay = `${i * 0.05}s`;
+    card.dataset.category = item.category;
+    card.innerHTML = `
+      <div class="card-img">
+        <img src="${item.img}" alt="${item.name}" loading="lazy">
+        ${item.badge ? `<span class="card-badge ${item.badgeType}">${item.badge}</span>` : ''}
+        <button class="card-like ${item.liked ? 'liked' : ''}" data-id="${item.id}" aria-label="${item.liked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" aria-pressed="${item.liked}">
+          <i class="fa${item.liked ? 's' : 'r'} fa-heart"></i>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="card-category">${getCategoryLabel(item.category)}</div>
+        <div class="card-name">${item.name}</div>
+        <p class="card-desc">${item.desc}</p>
+        <div class="card-footer">
+          <div class="card-price">R$ ${item.price.toFixed(2).replace('.', ',')}</div>
+          <div class="counter" role="group" aria-label="Quantidade">
+            <button class="counter-btn" data-id="${item.id}" data-action="minus" aria-label="Diminuir quantidade">−</button>
+            <span class="counter-num" data-val="${count}" aria-label="Quantidade: ${count}">${count}</span>
+            <button class="counter-btn" data-id="${item.id}" data-action="plus" aria-label="Aumentar quantidade">+</button>
+          </div>
+        </div>
+        ${count > 0 ? `<button class="add-btn" data-id="${item.id}" aria-label="Adicionar ${item.name} ao carrinho"><i class="fa fa-cart-plus"></i> Adicionar ao Carrinho</button>` : ''}
+      </div>
+    `;
+    grid.appendChild(card);
+    setTimeout(() => card.classList.add('visible'), 50);
+  });
+  attachCardEvents();
+}
+
+function getCategoryLabel(cat) {
+  const map = { hamburger: '🍔 Burger', sides: '🍟 Acompanhamento', drinks: '🥤 Bebida', desserts: '🍰 Sobremesa' };
+  return map[cat] || cat;
+}
+
+/* ===== CARD EVENTS ===== */
+function attachCardEvents() {
+  document.querySelectorAll('.counter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = parseInt(this.dataset.id);
+      const action = this.dataset.action;
+      const item = menuItems.find(m => m.id === id);
+      let cartItem = cart.find(c => c.id === id);
+      if (action === 'plus') {
+        if (cartItem) cartItem.qty++; else cart.push({ id, name: item.name, price: item.price, img: item.img, qty: 1 });
+        showToast(`${item.name} adicionado!`, 'success');
+      } else {
+        if (cartItem && cartItem.qty > 0) {
+          cartItem.qty--;
+          if (cartItem.qty === 0) cart = cart.filter(c => c.id !== id);
+        }
+      }
+      saveCart();
+      renderMenu();
+      updateCartUI();
+      ripple(this);
+    });
+  });
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = parseInt(this.dataset.id);
+      const item = menuItems.find(m => m.id === id);
+      showToast(`${item.name} adicionado ao carrinho! 🔥`, 'success');
+      ripple(this);
+    });
+  });
+  document.querySelectorAll('.card-like').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = parseInt(this.dataset.id);
+      const item = menuItems.find(m => m.id === id);
+      item.liked = !item.liked;
+      this.classList.toggle('liked');
+      this.setAttribute('aria-pressed', item.liked);
+      this.innerHTML = `<i class="fa${item.liked ? 's' : 'r'} fa-heart"></i>`;
+      if (item.liked) showToast(`${item.name} adicionado aos favoritos! ❤️`, 'info');
+    });
+  });
+}
+
+/* ===== CART UI ===== */
+function updateCartUI() {
+  const totalItems = cart.reduce((sum, i) => sum + i.qty, 0);
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = totalItems;
+  badge.classList.toggle('show', totalItems > 0);
+  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  const body = document.getElementById('cart-body');
+  const empty = document.getElementById('cart-empty');
+  body.querySelectorAll('.cart-item').forEach(el => el.remove());
+  if (cart.length === 0) {
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    cart.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'cart-item';
+      el.innerHTML = `
+        <img class="cart-item-img" src="${item.img}" alt="${item.name}" loading="lazy">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-price">R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')} (×${item.qty})</div>
+        </div>
+        <button class="cart-item-remove" data-id="${item.id}" aria-label="Remover ${item.name} do carrinho">✕ remover</button>
+      `;
+      body.appendChild(el);
+    });
+    body.querySelectorAll('.cart-item-remove').forEach(btn => {
+      btn.addEventListener('click', function() {
+        cart = cart.filter(c => c.id !== parseInt(this.dataset.id));
+        saveCart();
+        updateCartUI();
+        renderMenu();
+      });
+    });
+  }
+}
+
+/* ===== TOAST ===== */
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  const icons = { success: 'fa-check-circle', info: 'fa-info-circle', error: 'fa-exclamation-circle' };
+  const colors = { success: 'var(--clr-fire)', info: '#3B82F6', error: '#EF4444' };
+  toast.style.borderLeftColor = colors[type] || colors.success;
+  toast.innerHTML = `
+    <i class="fa ${icons[type] || icons.success} toast-icon" style="color:${colors[type]}" aria-hidden="true"></i>
+    <span>${message}</span>
+    <div class="toast-progress" style="background:${colors[type]}"></div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('exit');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+/* ===== RIPPLE ===== */
+function ripple(btn) {
+  const r = document.createElement('span');
+  r.className = 'ripple-effect';
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  r.style.cssText = `width:${size}px;height:${size}px;left:${rect.width/2 - size/2}px;top:${rect.height/2 - size/2}px;`;
+  btn.style.position = 'relative';
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+}
+document.querySelectorAll('.btn-primary, .btn-checkout, .btn-success, .filter-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) { ripple(this); });
+});
+
+/* ===== FILTER ===== */
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+    this.classList.add('active');
+    this.setAttribute('aria-pressed', 'true');
+    currentFilter = this.dataset.filter;
+    renderMenu();
+  });
+});
+
+/* ===== SEARCH ===== */
+document.getElementById('search-input').addEventListener('input', function() {
+  searchQuery = this.value;
+  renderMenu();
+});
+
+/* ===== CART TOGGLE ===== */
+document.getElementById('cart-btn').addEventListener('click', () => {
+  document.getElementById('cart-sidebar').classList.add('open');
+  document.getElementById('cart-overlay').classList.add('open');
+});
+document.getElementById('close-cart').addEventListener('click', closeCart);
+document.getElementById('cart-overlay').addEventListener('click', closeCart);
+function closeCart() {
+  document.getElementById('cart-sidebar').classList.remove('open');
+  document.getElementById('cart-overlay').classList.remove('open');
+}
+
+/* ===== CHECKOUT MODAL ===== */
+document.getElementById('btn-checkout').addEventListener('click', function() {
+  if (cart.length === 0) {
+    document.getElementById('cart-badge').classList.add('shake');
+    setTimeout(() => document.getElementById('cart-badge').classList.remove('shake'), 600);
+    showToast('Seu carrinho está vazio!', 'error');
+    return;
+  }
+  closeCart();
+  const modal = document.getElementById('order-modal');
+  const itemsEl = document.getElementById('modal-items');
+  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  itemsEl.innerHTML = cart.map(item => `
+    <div class="modal-item">
+      <span>${item.qty}× ${item.name}</span>
+      <span>R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}</span>
+    </div>
+  `).join('');
+  document.getElementById('modal-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  modal.classList.add('open');
+  // Reset button state
+  const btn = document.getElementById('btn-confirm-order');
+  btn.classList.remove('loading-state', 'success-state');
+  ripple(this);
+});
+document.getElementById('btn-close-modal').addEventListener('click', () => {
+  document.getElementById('order-modal').classList.remove('open');
+});
+document.getElementById('order-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+/* ===== CONFIRM ORDER ===== */
+document.getElementById('btn-confirm-order').addEventListener('click', function() {
+  if (this.classList.contains('loading-state') || this.classList.contains('success-state')) return;
+  this.classList.add('loading-state');
+  setTimeout(() => {
+    this.classList.remove('loading-state');
+    this.classList.add('success-state');
+    showToast('Pedido enviado com sucesso! 🔥 Aguarde até 30min.', 'success');
+    cart = [];
+    saveCart();
+    updateCartUI();
+    renderMenu();
+    setTimeout(() => {
+      document.getElementById('order-modal').classList.remove('open');
+    }, 2000);
+  }, 2000);
+  ripple(this);
+});
+
+/* ===== SCROLL EFFECTS ===== */
+const scrollProgress = document.getElementById('scroll-progress');
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  scrollProgress.style.width = pct + '%';
+  header.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+/* ===== FADE UP OBSERVER ===== */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+/* ===== THEME TOGGLE ===== */
+const savedTheme = localStorage.getItem('burn_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.getElementById('theme-toggle').addEventListener('click', function() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('burn_theme', next);
+});
+
+/* ===== TYPEWRITER ===== */
+const phrases = [
+  'Hambúrgueres artesanais grelhados na brasa...',
+  'Ingredientes frescos, sabor autêntico...',
+  'Delivery em até 30 minutos...',
+  'Porque comida boa une as pessoas...'
+];
+let phraseIdx = 0, charIdx = 0, isDeleting = false;
+function type() {
+  const el = document.getElementById('typewriter');
+  const phrase = phrases[phraseIdx];
+  el.innerHTML = phrase.substring(0, charIdx) + '<span class="cursor-blink">|</span>';
+  if (!isDeleting) {
+    if (charIdx < phrase.length) { charIdx++; setTimeout(type, 55); }
+    else { isDeleting = true; setTimeout(type, 1800); }
+  } else {
+    if (charIdx > 0) { charIdx--; setTimeout(type, 28); }
+    else { isDeleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; setTimeout(type, 400); }
+  }
+}
+setTimeout(type, 1200);
+
+/* ===== CUSTOM CURSOR ===== */
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  cursor.style.left = mouseX + 'px';
+  cursor.style.top = mouseY + 'px';
+});
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.15;
+  ringY += (mouseY - ringY) * 0.15;
+  cursorRing.style.left = ringX + 'px';
+  cursorRing.style.top = ringY + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+document.querySelectorAll('a,button,[role="button"]').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.classList.add('hover'); cursorRing.classList.add('hover'); });
+  el.addEventListener('mouseleave', () => { cursor.classList.remove('hover'); cursorRing.classList.remove('hover'); });
+});
+
+/* ===== FORM VALIDATION ===== */
+function validateField(id, errId, validator) {
+  const field = document.getElementById(id);
+  const err = document.getElementById(errId);
+  field.addEventListener('blur', () => {
+    const msg = validator(field.value);
+    if (msg) {
+      field.className = 'form-input error';
+      err.textContent = msg; err.classList.add('show');
+    } else {
+      field.className = 'form-input success';
+      err.classList.remove('show');
+    }
+  });
+  field.addEventListener('input', () => {
+    if (field.classList.contains('error')) {
+      const msg = validator(field.value);
+      if (!msg) { field.className = 'form-input success'; err.classList.remove('show'); }
+    }
+  });
+}
+validateField('name', 'name-error', v => !v.trim() ? 'Por favor, informe seu nome.' : v.trim().length < 3 ? 'Nome muito curto.' : '');
+validateField('email', 'email-error', v => !v ? 'Por favor, informe seu e-mail.' : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'E-mail inválido.' : '');
+validateField('message', 'message-error', v => !v.trim() ? 'Por favor, escreva sua mensagem.' : v.trim().length < 10 ? 'Mensagem muito curta.' : '');
+document.getElementById('contact-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const msg = document.getElementById('message').value.trim();
+  if (!name || !email || !msg) { showToast('Preencha todos os campos!', 'error'); return; }
+  showToast('Mensagem enviada com sucesso! 🙌', 'success');
+  this.reset();
+  document.querySelectorAll('.form-input').forEach(f => f.className = 'form-input');
+});
+
+/* ===== PARALLAX ===== */
+window.addEventListener('scroll', () => {
+  const hero = document.querySelector('.hero-content');
+  if (hero) hero.style.transform = `translateY(${window.scrollY * 0.2}px)`;
+});
+
+/* ===== PAGE LOADER ===== */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('page-loader').classList.add('hidden');
+  }, 1400);
+});
+
+/* ===== INIT ===== */
+renderMenu();
+updateCartUI();
+
+/* ===== OBSERVE NEW FADE-UP ELEMENTS ===== */
+const menuObserver = new MutationObserver(() => {
+  document.querySelectorAll('.fade-up:not(.visible)').forEach(el => observer.observe(el));
+});
+menuObserver.observe(document.getElementById('menu-grid'), { childList: true });
+</script>
+</body>
+</html>
